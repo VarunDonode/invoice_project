@@ -1,18 +1,19 @@
-import os
-from .enhancer import ImageEnhancer
-from .model import VisionModel
-from .extractor import InvoiceExtractor
-from google.colab import drive
+import argparse
+from enhancer import ImageEnhancer
+from model import VisionModel
+from extractor import InvoiceExtractor
 
 def main():
-    drive.mount('/content/drive')
-    img_path = os.getenv('INVOICE_PATH', '/content/drive/MyDrive/invoice_dataset/my_invoice_1.jpg')
+    parser = argparse.ArgumentParser(description="Extract invoice fields from an image.")
+    parser.add_argument('--img_path', type=str, required=True, help='Path to the invoice image')
+    args = parser.parse_args()
 
     enhancer = ImageEnhancer()
     model = VisionModel()
     extractor = InvoiceExtractor(enhancer, model)
 
-    result = extractor.extract(img_path)
+    result = extractor.extract(args.img_path)
+    print("\nPutput:-\n")
     print(result)
 
 if __name__ == '__main__':
