@@ -1,6 +1,6 @@
 from PIL import Image
-from .enhancer import ImageEnhancer
-from .model import VisionModel
+from enhancer import ImageEnhancer
+from model import VisionModel
 
 
 class InvoiceExtractor:
