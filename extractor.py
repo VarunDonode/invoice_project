@@ -15,18 +15,6 @@ class InvoiceExtractor:
         self.enhancer = enhancer
         self.model = model
 
-    def load_image(self, path: str) -> Image.Image:
-        """
-        Load an image file as a PIL Image in RGB mode.
-
-        Args:
-            path (str): filesystem path.
-
-        Returns:
-            Image.Image: loaded image.
-        """
-        return Image.open(path).convert("RGB")
-
     def extract(self, img_path: str) -> str:
         """
         Run full pipeline: load, enhance, and infer.
@@ -37,7 +25,7 @@ class InvoiceExtractor:
         Returns:
             str: model output with extracted fields.
         """
-        img = self.load_image(img_path)
+        img = Image.open(img_path).convert("RGB")
         enhanced = self.enhancer.enhance(img)
         messages = [
             {
