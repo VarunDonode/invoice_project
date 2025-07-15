@@ -37,7 +37,7 @@ class VisionModel:
                         "You are a helpful vision-language model trained to extract and present structured information from invoice images.\n\n"
                         "Given an invoice image, extract all important fields and present the output in clean **Markdown format**.\n\n"
                         "Use section headings, bullet points, and tables to organize the information.\n\n"
-                        "👉 If any field is not present in the image, **omit that field entirely** from the output. Do not guess or make up data.\n\n"
+                        "If any field is not present in the image, **omit that field entirely** from the output. Do not guess or make up data.\n\n"
                         "### Fields to Extract (if available):\n"
                         "- Invoice Number\n"
                         "- Invoice Date\n"
