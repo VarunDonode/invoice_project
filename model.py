@@ -13,7 +13,7 @@ class VisionModel:
     """
     def __init__(
         self,
-        model_id: str = "Qwen/Qwen2.5-VL-7B-Instruct",
+        model_id: str = "Qwen/Qwen2.5-VL-3B-Instruct",
         device: str | None = None,
         load_in_4bit: bool = True,
     ):
