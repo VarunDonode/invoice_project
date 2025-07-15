@@ -11,7 +11,6 @@ def main():
     extractor = InvoiceExtractor(model)
 
     result = extractor.extract(args.img_path)
-    print(result)
 
 if __name__ == '__main__':
     main()
