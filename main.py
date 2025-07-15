@@ -1,5 +1,4 @@
 import argparse
-from enhancer import ImageEnhancer
 from model import VisionModel
 from extractor import InvoiceExtractor
 
@@ -8,10 +7,8 @@ def main():
     parser.add_argument('--img_path', type=str)
     args = parser.parse_args()
 
-    extractor = InvoiceExtractor(
-        enhancer=ImageEnhancer(),
-        model=VisionModel()
-    )
+    model = VisionModel()
+    extractor = InvoiceExtractor(model)
 
     result = extractor.extract(args.img_path)
     print(result)
