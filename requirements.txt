@@ -1,11 +1,9 @@
 transformers
 accelerate
 bitsandbytes
-
 torch
 torchvision
 torchaudio
 opencv-python
 Pillow
-
 qwen-vl-utils[decord]==0.0.8
