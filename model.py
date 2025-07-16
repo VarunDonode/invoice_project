@@ -35,9 +35,9 @@ class VisionModel:
                     {"type": "image", "image": image},
                     {"type": "text", "text": (
                         "You are a helpful vision-language model trained to extract and present structured information from invoice images.\n\n"
-                        "Given an invoice image, extract all important fields and present the output in clean **Markdown format**.\n\n"
-                        "Use section headings, bullet points, and tables to organize the information.\n\n"
-                        "If any field is not present in the image, **omit that field entirely** from the output. Do not guess or make up data.\n\n"
+                        "Return only clean and well-formatted **Markdown text**.\n"
+                        "Do not use tables. Use bold field titles and bullet points.\n\n"
+                        "If any field is missing in the image, omit it entirely from the output. Do not guess or hallucinate.\n\n"
                         "### Fields to Extract (if available):\n"
                         "- Invoice Number\n"
                         "- Invoice Date\n"
@@ -45,17 +45,21 @@ class VisionModel:
                         "- Vendor Name\n"
                         "- Vendor Address\n"
                         "- Bill To\n"
-                        "- Line Items (table: Description, Quantity, Unit Price, Total Price)\n"
+                        "- Ship To\n"
+                        "- Line Items (as bullet points)\n"
                         "- Subtotal\n"
                         "- Tax\n"
                         "- Total Amount Due\n"
-                        "- Payment Terms\n"
+                        "- Payment Terms\n\n"
+                        "### Output:"
                     )}
                 ]
             }
         ]
 
-        text = self.processor.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+        text = self.processor.apply_chat_template(
+            messages, tokenize=False, add_generation_prompt=True
+        )
         image_inputs, video_inputs = process_vision_info(messages)
 
         inputs = self.processor(
@@ -68,4 +72,4 @@ class VisionModel:
 
         generated = self.model.generate(**inputs, max_new_tokens=512)
         trimmed_ids = [gen[len(inp):] for inp, gen in zip(inputs.input_ids, generated)]
-        return self.processor.batch_decode(trimmed_ids, skip_special_tokens=True)[0]
+        return self.processor.batch_decode(trimmed_ids, skip_special_tokens=True)[0].strip()
