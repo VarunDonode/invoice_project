@@ -4,9 +4,9 @@ from transformers import (
     AutoModelForVision2Seq,
     AutoProcessor,
     BitsAndBytesConfig,
+    GenerationConfig,
 )
 from qwen_vl_utils import process_vision_info
-
 
 class VisionModel:
     """
@@ -14,22 +14,29 @@ class VisionModel:
     """
     def __init__(self):
         self.model_id = "Qwen/Qwen2.5-VL-3B-Instruct"
-        self.processor = AutoProcessor.from_pretrained(self.model_id)
-        self.tokenizer = AutoTokenizer.from_pretrained(self.model_id)
 
+        # Quantization config (fixes 4-bit warning)
         bnb_config = BitsAndBytesConfig(
             load_in_4bit=True,
             bnb_4bit_compute_dtype=torch.float16,
         )
 
+        self.processor = AutoProcessor.from_pretrained(self.model_id)
+        self.tokenizer = AutoTokenizer.from_pretrained(self.model_id)
         self.model = AutoModelForVision2Seq.from_pretrained(
             self.model_id,
-            torch_dtype=torch.float16,
             device_map="auto",
+            torch_dtype=torch.float16,
             quantization_config=bnb_config,
         )
-
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
+
+        # Optional: Set temperature here cleanly
+        self.generation_config = GenerationConfig(
+            max_new_tokens=400,
+            temperature=0.7,
+            do_sample=False
+        )
 
     def infer(self, image):
         """
@@ -52,9 +59,8 @@ class VisionModel:
             "5. Vendor Contact Information\n"
             "6. Customer Name\n"
             "7. Customer Address\n"
-            "8. List of Line Items\n"
-            "9. Payment Instructions\n"
-            "10. Total Amount Due\n"
+            "8. Payment Instructions\n"
+            "9. Total Amount Due\n"
             "If any field is missing, say 'Not found'. Return each field on a new line."
         )
 
@@ -68,7 +74,9 @@ class VisionModel:
             }
         ]
 
-        text = self.processor.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+        text = self.processor.apply_chat_template(
+            messages, tokenize=False, add_generation_prompt=True
+        )
         image_inputs, video_inputs = process_vision_info(messages)
 
         inputs = self.processor(
@@ -79,6 +87,10 @@ class VisionModel:
             return_tensors="pt"
         ).to(self.device)
 
-        generated = self.model.generate(**inputs, max_new_tokens=400, do_sample=False, temperature=0.7)
+        generated = self.model.generate(
+            **inputs,
+            generation_config=self.generation_config
+        )
+
         trimmed_ids = [gen[len(inp):] for inp, gen in zip(inputs.input_ids, generated)]
         return self.processor.batch_decode(trimmed_ids, skip_special_tokens=True)[0].strip()
