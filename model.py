@@ -29,17 +29,21 @@ class VisionModel:
             str: Extracted information, each field on a new line.
         """
         prompt = (
-            "You are a smart assistant who specializes in understanding invoices. Below is an invoice image.\n"
-            "<image>\n"
-            "Extract the following fields from this invoice:\n"
-            "1. Invoice Date\n"
-            "2. Company Name\n"
-            "3. Total Amount\n"
-            "4. Payment Terms\n"
-            "5. Shipper Address\n"
-            "6. Receiver Address\n"
-            "If any field is missing, say 'Not found'. Return each field on a new line."
-        )
+    "You are a smart assistant who specializes in understanding invoices. Below is an invoice image.\n"
+    "<image>\n"
+    "Extract the following fields from this invoice:\n"
+    "1. Invoice Number\n"
+    "2. Invoice Date\n"
+    "3. Due Date\n"
+    "4. Vendor Name\n"
+    "5. Vendor Contact Information\n"
+    "6. Customer Name\n"
+    "7. Customer Address\n"
+    "8. List of Line Items\n"
+    "9. Payment Instructions\n"
+    "10. Total Amount Due\n"
+    "If any field is missing, say 'Not found'. Return each field on a new line."
+)
 
         messages = [
             {
