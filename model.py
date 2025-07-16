@@ -15,7 +15,7 @@ class VisionModel:
     def __init__(self):
         self.model_id = "Qwen/Qwen2.5-VL-3B-Instruct"
 
-        # Quantization config (fixes 4-bit warning)
+        # ✅ 4-bit quantization config
         bnb_config = BitsAndBytesConfig(
             load_in_4bit=True,
             bnb_4bit_compute_dtype=torch.float16,
@@ -31,10 +31,9 @@ class VisionModel:
         )
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
 
-        # Optional: Set temperature here cleanly
+        # ✅ Generation config without deprecated temperature flag
         self.generation_config = GenerationConfig(
             max_new_tokens=400,
-            temperature=0.7,
             do_sample=False
         )
 
@@ -46,7 +45,7 @@ class VisionModel:
             image (PIL.Image): The invoice image.
 
         Returns:
-            str: Extracted information, each field on a new line.
+            str: Extracted information in markdown format.
         """
         prompt = (
             "You are a smart assistant who specializes in understanding invoices. Below is an invoice image.\n"
@@ -61,7 +60,7 @@ class VisionModel:
             "7. Customer Address\n"
             "8. Payment Instructions\n"
             "9. Total Amount Due\n"
-            "If any field is missing, say 'Not found'. Return each field on a new line."
+            "If any field is missing, say 'Not found'. Return each field on a new line in **markdown format**."
         )
 
         messages = [
