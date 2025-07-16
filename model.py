@@ -14,46 +14,39 @@ class VisionModel:
             self.model_id,
             torch_dtype=torch.float16,
             device_map="auto",
-            load_in_4bit=True  # We'll upgrade this to BitsAndBytesConfig later
+            load_in_4bit=True
         )
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
 
     def infer(self, image):
         """
-        Run inference on the given PIL image.
+        Run inference on the given PIL image using a simplified prompt.
 
         Args:
             image (PIL.Image): The invoice image.
 
         Returns:
-            str: Clean Markdown output with bullet points.
+            str: Extracted information, each field on a new line.
         """
+        prompt = (
+            "You are a smart assistant who specializes in understanding invoices. Below is an invoice image.\n"
+            "<image>\n"
+            "Extract the following fields from this invoice:\n"
+            "1. Invoice Date\n"
+            "2. Company Name\n"
+            "3. Total Amount\n"
+            "4. Payment Terms\n"
+            "5. Shipper Address\n"
+            "6. Receiver Address\n"
+            "If any field is missing, say 'Not found'. Return each field on a new line."
+        )
+
         messages = [
             {
                 "role": "user",
                 "content": [
                     {"type": "image", "image": image},
-                    {"type": "text", "text": (
-                        "You are an intelligent model trained to extract structured information from invoice images.\n\n"
-                        "✅ Output should be in plain **Markdown** using only bullet points.\n"
-                        "❌ Do NOT use tables or column formatting.\n"
-                        "❌ Do NOT guess missing fields. Only include fields actually present in the image.\n"
-                        "❌ Avoid repeating phrases.\n\n"
-                        "### Required Output Format:\n"
-                        "- **Invoice Number:**\n"
-                        "- **Invoice Date:**\n"
-                        "- **Due Date:**\n"
-                        "- **Vendor Name:**\n"
-                        "- **Vendor Address:**\n"
-                        "- **Bill To:**\n"
-                        "- **Ship To:**\n"
-                        "- **Line Items:**\n"
-                        "- **Subtotal:**\n"
-                        "- **Tax:**\n"
-                        "- **Total Amount Due:**\n"
-                        "- **Payment Terms:**\n\n"
-                        "If any of the above fields is not present in the invoice, skip it silently."
-                    )}
+                    {"type": "text", "text": prompt}
                 ]
             }
         ]
@@ -69,5 +62,7 @@ class VisionModel:
             return_tensors="pt"
         ).to(self.device)
 
-        # Reduce tokens to avoid runaway generation
-        generated = self.model.generate(**inputs, max_new_t**
+        generated = self.model.generate(**inputs, max_new_tokens=400, do_sample=False, temperature=0.7)
+
+        trimmed_ids = [gen[len(inp):] for inp, gen in zip(inputs.input_ids, generated)]
+        return self.processor.batch_decode(trimmed_ids, skip_special_tokens=True)[0].strip()
